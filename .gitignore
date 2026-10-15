@@ -1,0 +1,33 @@
+# ─────────────────────────────────────────────────────────────
+# PRIVATE / OPERATOR-ONLY — never push to any public remote.
+# Everything under private/ is RESTRICTED/LOCAL scope.
+# ─────────────────────────────────────────────────────────────
+private/
+/private/**
+
+# Secrets — never commit any real key or environment file
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+credentials*
+
+# Local state / ledgers (examples only live in docs)
+*.ledger
+*.ledger.jsonl
+ledger/
+queue/
+
+# Python (for any future reference implementation)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
