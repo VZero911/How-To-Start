@@ -1,0 +1,43 @@
+name: doc-lint
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Relative Markdown links resolve
+        run: |
+          python3 - <<'PY'
+          import pathlib, re, sys
+
+          link = re.compile(r'\]\(([^)\s]+)\)')
+          broken = []
+          for md in pathlib.Path('.').rglob('*.md'):
+              if '.git' in md.parts or 'private' in md.parts:
+                  continue
+              for target in link.findall(md.read_text(encoding='utf-8')):
+                  if target.startswith(('http://', 'https://', 'mailto:', '#')):
+                      continue
+                  path = target.split('#')[0]
+                  if path and not (md.parent / path).exists():
+                      broken.append(f'{md}: {target}')
+          for item in broken:
+              print('BROKEN LINK', item)
+          sys.exit(1 if broken else 0)
+          PY
+
+      - name: No real API key material committed
+        run: |
+          if grep -rnE 'sk-ant-[A-Za-z0-9_-]{20,}' --exclude-dir=.git .; then
+            echo "Possible real Anthropic API key found. Remove it and rotate the key."
+            exit 1
+          fi
+          echo "No key-shaped strings found."

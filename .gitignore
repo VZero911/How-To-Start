@@ -1,6 +1,5 @@
 # ─────────────────────────────────────────────────────────────
 # PRIVATE / OPERATOR-ONLY — never push to any public remote.
-# Everything under private/ is RESTRICTED/LOCAL scope.
 # ─────────────────────────────────────────────────────────────
 private/
 /private/**
