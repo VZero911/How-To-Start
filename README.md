@@ -44,7 +44,7 @@ curl http://localhost:8080/status
 - **ALICE:** Autonomous AI agent framework — task execution, tool routing, chain sync.
 - **alice-general:** Worker node that receives and processes tasks from the coordinator service.
 - **the coordinator service:** Task coordinator — routes work to workers, manages priorities.
-- **THESEED:** L0 blockchain infrastructure (chain 31337, Clique PoA).
+- **THESEED:** L0 blockchain infrastructure (chain 0, Clique PoA).
 - **NETHUB:** Isolated browser — zero tracking, zero telemetry.
 - **x402:** Micropayment service layer — USDC on Base.
 - **Fleet node:** One container running task work as concurrent workers.
