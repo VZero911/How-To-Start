@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://claude.ai/artifact/88ZY1cVwBZySPfCu3jBbUk">
+    <img src="assets/public_stack_full.png" alt="The Public Stack — A.L.I.C.E, Hubs, THESEED" width="100%" />
+  </a>
+</p>
+
 # How-To-Start
 
 Entry point for **how to start V0 projects and deploys**.
