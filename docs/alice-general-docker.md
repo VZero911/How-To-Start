@@ -1,40 +1,39 @@
-# ALICE GENERAL — Docker Quickstart
+# ALICE General — Docker Quickstart
 
 Minimum Docker setup to run one **alice-general** worker node.
 
 ## What it does
 
-`alice-general` is a task executor. It:
+`alice-general` is a task-executor worker. It:
 
-1. Connects to **the coordinator service** (task coordinator) and **dashboard** (dashboard service).
-2. Receives tasks — code review, DeFi scanning, system health checks.
-3. Processes tasks via the x402 service layer or delegation server.
-4. Reports completion back to COORDINATOR.
-5. Self-generates tasks when idle (marketplace scans, chain monitoring).
+1. Connects to an upstream **coordinator service** (task distribution) and a **dashboard service** (status reporting).
+2. Receives tasks — code review, scanning, health checks.
+3. Processes them through the upstream service layer.
+4. Reports completion back to the coordinator.
+5. Self-generates work when idle.
 
-The node does **not** call a model directly. It delegates to upstream services.
+The node does **not** call a model directly — it delegates to upstream services.
 
 ## Requirements
 
 - Docker and Docker Compose
-- A running the coordinator service on the same machine (or reachable network)
-- A running dashboard server on the same machine (or reachable network)
+- Reachable coordinator and dashboard services (same machine or network)
 
 ## Quick start
 
 ```bash
 cd docker/alice-general
-cp .env.example .env          # edit if COORDINATOR runs on a different host
+cp .env.example .env      # set the hosts/ports for your own environment
 docker compose up -d --build
 ```
 
-Verify:
+Verify (replace `<host>` and `<port>` with the values from your `.env`):
 
 ```bash
-curl http://localhost:8080/health
+curl http://<host>:<port>/health
 # {"status":"ok"}
 
-curl http://localhost:8080/status
+curl http://<host>:<port>/status
 # full node status JSON
 ```
 
@@ -48,57 +47,29 @@ curl http://localhost:8080/status
 | `/task` | POST | Submit a task `{"type":"...", "input":"..."}` |
 | `/complete` | POST | Report task completion (from upstream) |
 
-## Environment
+## Configuration
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `ALICE_ROLE` | `GENERAL` | Node role identifier |
-| `ALICE_PORT` | `8080` | HTTP port |
-| `DASHBOARD_HOST` | `localhost` | dashboard server host |
-| `DASHBOARD_PORT` | `8083` | dashboard server port |
-| `COORDINATOR_HOST` | `localhost` | the coordinator service host |
-| `COORDINATOR_PORT` | `8082` | the coordinator service port |
-| `X402_HOST` | `localhost` | x402 service host |
-| `X402_PORT` | `8084` | x402 service port |
+All settings come from `.env`. No real hosts or ports are published here — supply your own.
 
-## Architecture
-
-```
-┌─────────────────────────────────┐
-│         the coordinator service            │
-│    (task coordinator :8082)     │
-└──────────┬──────────────────────┘
-           │  tasks ↓  results ↑
-┌──────────▼──────────────────────┐
-│       alice-general             │
-│    (worker node :8080)          │
-│                                 │
-│  connectivity_loop  ←→  DASHBOARD     │
-│  worker_loop        ←→  COORDINATOR │
-│  self_task_loop     →  tasks   │
-└─────────────────────────────────┘
-           │
-    ┌──────▼──────┐
-    │  x402 / DLG │
-    │  (upstream)  │
-    └─────────────┘
-```
+| Variable | Description |
+|----------|-------------|
+| `ALICE_ROLE` | Node role identifier |
+| `ALICE_PORT` | HTTP port the node binds |
+| `COORDINATOR_HOST` / `COORDINATOR_PORT` | Upstream coordinator service |
+| `DASHBOARD_HOST` / `DASHBOARD_PORT` | Dashboard service |
+| `X402_HOST` / `X402_PORT` | x402 payment service |
 
 ## Scale
 
-To run multiple workers:
+Run multiple workers by giving each its own port and Compose project name:
 
 ```bash
-# Worker 1 on port 8080 (default)
-ALICE_PORT=8080 docker compose up -d --build
-
-# Worker 2 on port 8081
-ALICE_PORT=8081 docker compose -p alice-general-2 up -d --build
+ALICE_PORT=<port-a> docker compose up -d --build
+ALICE_PORT=<port-b> docker compose -p alice-general-2 up -d --build
 ```
 
 ## Security
 
-- Binds to `localhost` only — no network exposure.
-- `no-new-privileges` Docker security opt.
-- No secrets, no API keys, no model calls.
-- No secrets or privileged endpoints are exposed.
+- Binds to localhost only by default — no public network exposure.
+- Runs with the `no-new-privileges` Docker security option.
+- No secrets, no API keys, and no model calls in this node.
